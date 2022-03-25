@@ -15,10 +15,12 @@ class html {
     
     private function criaCalculadora() {
         $this->criaVisor();
-        $this->criaCampos(['1' => '1', '2' => '2', '3' => '3', 'mult' => 'X']);
-        $this->criaCampos(['4' => '4', '5' => '5', '6' => '6', 'subt' => '-']);
-        $this->criaCampos(['7' => '7', '8' => '8', '9' => '9', 'soma' => '+']);
-        $this->criaCampos(['div' => '%', 'zero' => '0', 'limpar' => 'C', 'igual' => '=']);
+        $this->criaCampos(['number' => ['1', '2', '3'], 'operador' => 'X']);
+        $this->criaCampos(['number' => ['4', '5', '6'], 'operador' => '-']);
+        $this->criaCampos(['number' => ['7', '8', '9'], 'operador' => '+']);
+        $this->criaCampos(['operador' => '%', 'zero' => '0'], false);
+        $this->criaCampos(['operador' => 'C'], false);
+        $this->criaCampos(['operador' => '='], false);
     }
     
     private function criaVisor() {
@@ -26,12 +28,18 @@ class html {
         echo "<input id='visor' type='text' disabled value='{$iValor}'>";
     }
     
-    private function criaCampos(array $aCampos) {
-        echo '<tr>';
-        foreach ($aCampos as $sKey => $sValue) {
-            echo "<td><input type='submit' name='{$sKey}' value='{$sValue}'></td>"; 
+    private function criaCampos(array $aCampos, $bAbreFechaTr = true) {
+        if($bAbreFechaTr){
+            echo '<tr>';
         }
-        echo '</tr>';
+        foreach ($aCampos as $sKey => $aValores) {
+            foreach ((array) $aValores as $xValor) {
+                echo "<td><input type='submit' name='{$sKey}' value='{$xValor}'></td>"; 
+            }
+        }
+        if($bAbreFechaTr){
+            echo '</tr>';
+        }
     }
     
     public function __destruct() {

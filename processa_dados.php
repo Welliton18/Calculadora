@@ -9,54 +9,60 @@ class processaDados {
     }
     
     private function processaDados() {
-        foreach ($_POST as $sKey => $sValue) {
-            if(!$this->isNumero($sValue) && (!isset($_SESSION['valor_visor']) || is_null($_SESSION['valor_visor']))){
-                    return;
-            }
+        
 
-            if(isset($_SESSION['reset']) && $_SESSION['reset']){
-                $this->isNumero($sValue) ? $_SESSION['valor_visor'] = null : true;
-                $this->isNumero($sValue) ? $_SESSION['valor1'] = null : true;
-                $_SESSION['reset'] = false;
-            } 
-
-            if($sKey == 'limpar'){
-                $_SESSION['valor_visor'] = null;
-                $_SESSION['operador'] = null;
-            } else if($sKey === 'igual'){
-                $this->calcula();
-                $_SESSION['valor_visor'] = $_SESSION['valor1'];
+        if(isset($_POST['number'])){
+            if(!isset($_SESSION['num1'])){
+                $_SESSION['num1'] = $_POST['number'];
+                $_SESSION['valor_visor'] = $_SESSION['num1'] ;
+            } else if(!isset($_SESSION['operador'])){
+                $_SESSION['num1'] .= $_POST['number'];
+                $_SESSION['valor_visor'] = $_SESSION['num1'] ;
+            } else if(!isset($_SESSION['num2'])){
+                $_SESSION['num2'] = $_POST['number'];
+                $_SESSION['valor_visor'] = $_SESSION['num2'] ;
             } else {
-                isset($_SESSION['valor_visor']) ? $_SESSION['valor_visor'] .= $sValue : $_SESSION['valor_visor'] = $sValue;
-                if(!$this->isNumero($sValue)){
-                    $_SESSION['operador'] = $sValue;
-                } else if(!isset($_SESSION['operador']) || is_null($_SESSION['operador'])){
-                    $_SESSION['valor1'] = $_SESSION['valor_visor'];
-                } else {
-                    isset($_SESSION['valor2'])? $_SESSION['valor2'].= $sValue : $_SESSION['valor2'] = $sValue;
-                }
+                $_SESSION['num2'] .= $_POST['number'];
+                $_SESSION['valor_visor'] = $_SESSION['num2'] ;
             }
         }
+        
+
+        if(isset($_POST['operador'])){
+            if($_POST['operador'] === 'C'){
+                $this->limpar();
+            } else if($_POST['operador'] === '=' || isset($_SESSION['operador'])){
+                $this->calcula($_SESSION['operador']);
+            } else {
+                $_SESSION['operador'] = $_POST['operador'];
+            }
+        }
+    } 
+
+    private function limpar(){
+        session_destroy();
+        session_start();
     }
     
-    private function calcula() {
-        switch (true) {
-            case $_SESSION['operador'] === '+':
-                $_SESSION['valor1'] = Calculadora::soma($_SESSION['valor1'], $_SESSION['valor2']);
+    private function calcula($sOperador) {
+        switch ($sOperador) {
+            case '+':
+                $_SESSION['num1'] = Calculadora::soma($_SESSION['num1'], $_SESSION['num2']);
                 break;
-            case $_SESSION['operador'] === '-':
-                $_SESSION['valor1'] = Calculadora::subrtracao($_SESSION['valor1'], $_SESSION['valor2']);
+            case '-':
+                $_SESSION['num1'] = Calculadora::subrtracao($_SESSION['num1'], $_SESSION['num2']);
                 break;
-            case $_SESSION['operador'] === 'X':
-                $_SESSION['valor1'] = Calculadora::multiplicacao($_SESSION['valor1'], $_SESSION['valor2']);
+            case 'X':
+                $_SESSION['num1'] = Calculadora::multiplicacao($_SESSION['num1'], $_SESSION['num2']);
                 break;
-            case $_SESSION['operador'] === '%':
-                $_SESSION['valor1'] = Calculadora::divisao($_SESSION['valor1'], $_SESSION['valor2']);
+            case '%':
+                $_SESSION['num1'] = Calculadora::divisao($_SESSION['num1'], $_SESSION['num2']);
                 break;
         }
         $_SESSION['reset'] = true;
         $_SESSION['operador'] = null;
-        $_SESSION['valor2'] = null;
+        $_SESSION['num2'] = null;
+        $_SESSION['valor_visor'] = $_SESSION['num1'];
     }
     
     private function isNumero($iNumero) {
